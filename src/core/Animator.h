@@ -25,6 +25,8 @@ public:
     void update(float dt);  // dt = seconds since the last frame
     void togglePlay();  // at the end, playing again restarts from step 0
     void pause() { playing_ = false; }
+    void setDelay(float seconds);  // clamped to [0.05, 2] seconds per step
+    float delay() const { return delay_; }
     void stepForward();
     void stepBack();
 

@@ -8,7 +8,7 @@
             "command": "g++",
             "args": [
                 "-std=c++17", "-Wall", "-Wextra", "-g", "-Isrc",
-                "src/core/Graph.cpp", "src/core/Algorithms.cpp", "src/core/Animator.cpp",
+                "src/core/Graph.cpp", "src/core/Algorithms.cpp", "src/core/Animator.cpp", "src/core/GraphIO.cpp",
                 "src/app/App.cpp", "src/app/InputHandler.cpp", "src/app/Renderer.cpp",
                 "src/main.cpp",
                 "-o", "build/graphviz.exe",
@@ -31,8 +31,8 @@
             "command": "g++",
             "args": [
                 "-std=c++17", "-Wall", "-Wextra", "-g", "-Isrc", "-Itests/catch2",
-                "src/core/Graph.cpp", "src/core/Algorithms.cpp", "src/core/Animator.cpp",
-                "tests/test_graph.cpp", "tests/test_algorithms.cpp", "tests/test_animator.cpp",
+                "src/core/Graph.cpp", "src/core/Algorithms.cpp", "src/core/Animator.cpp", "src/core/GraphIO.cpp",
+                "tests/test_graph.cpp", "tests/test_algorithms.cpp", "tests/test_animator.cpp", "tests/test_io.cpp",
                 "build/catch2.o",
                 "-o", "build/tests.exe"
             ],

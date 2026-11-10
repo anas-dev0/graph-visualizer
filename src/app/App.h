@@ -29,6 +29,7 @@ private:
     Renderer renderer_{font_};
     Animator animator_;
     std::string algoName_;
+    std::string status_;                // e.g. "Saved to graph.txt", shown in the help text
     bool screenshotRequested_ = false;  // F12
     int screenshotCount_ = 0;
 };

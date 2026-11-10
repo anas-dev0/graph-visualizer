@@ -2,6 +2,12 @@
 #include <stdexcept>
 #include <utility>
 #include "core/Algorithms.h"
+#include "core/GraphIO.h"
+
+namespace {
+const char* kSaveFile = "graph.txt";
+const char* kSampleFile = "examples/sample.txt";
+}  // namespace
 
 App::App()
     : window_(sf::VideoMode(1000, 700), "Graph Algorithms Visualizer",
@@ -9,6 +15,7 @@ App::App()
     window_.setFramerateLimit(60);
     if (!font_.loadFromFile("assets/DejaVuSans.ttf"))
         throw std::runtime_error("Could not load assets/DejaVuSans.ttf. Run the app from the project folder.");
+    if (auto sample = loadGraph(kSampleFile)) graph_ = *sample;  // start with a demo graph if present
 }
 
 void App::run() {
@@ -40,14 +47,29 @@ void App::handleEvent(const sf::Event& event) {
 }
 
 void App::handleEditKey(sf::Keyboard::Key key) {
+    if (input_.dragFrom() != -1) return;  // finish the drag first
+    status_.clear();
     int start = input_.startNode();
     switch (key) {
     case sf::Keyboard::Num1: startAlgorithm("BFS", algo::bfs(graph_, start)); break;
     case sf::Keyboard::Num2: startAlgorithm("DFS", algo::dfs(graph_, start)); break;
     case sf::Keyboard::Num3: startAlgorithm("Dijkstra", algo::dijkstra(graph_, start)); break;
+    case sf::Keyboard::Num4: startAlgorithm("Kruskal (MST)", algo::kruskal(graph_)); break;
     case sf::Keyboard::C:
         graph_.clear();
         input_.reset();
+        break;
+    case sf::Keyboard::S:
+        status_ = saveGraph(graph_, kSaveFile) ? "Saved to graph.txt" : "Could not save graph.txt";
+        break;
+    case sf::Keyboard::L:
+        if (auto loaded = loadGraph(kSaveFile)) {
+            graph_ = *loaded;
+            input_.reset();
+            status_ = "Loaded graph.txt";
+        } else {
+            status_ = "Could not load graph.txt (missing or invalid)";
+        }
         break;
     default: break;
     }
@@ -55,17 +77,21 @@ void App::handleEditKey(sf::Keyboard::Key key) {
 
 void App::handleAnimationKey(sf::Keyboard::Key key) {
     switch (key) {
-    case sf::Keyboard::Space:  animator_.togglePlay(); break;
-    case sf::Keyboard::Right:  animator_.pause(); animator_.stepForward(); break;
-    case sf::Keyboard::Left:   animator_.pause(); animator_.stepBack(); break;
-    case sf::Keyboard::Escape: animator_.stop(); break;
+    case sf::Keyboard::Space:    animator_.togglePlay(); break;
+    case sf::Keyboard::Right:    animator_.pause(); animator_.stepForward(); break;
+    case sf::Keyboard::Left:     animator_.pause(); animator_.stepBack(); break;
+    case sf::Keyboard::Equal:    // the +/= key
+    case sf::Keyboard::Add:      animator_.setDelay(animator_.delay() / 2.f); break;
+    case sf::Keyboard::Hyphen:   // the -/_ key
+    case sf::Keyboard::Subtract: animator_.setDelay(animator_.delay() * 2.f); break;
+    case sf::Keyboard::Escape:   animator_.stop(); break;
     default: break;
     }
 }
 
 void App::startAlgorithm(const std::string& name, std::vector<Step> steps) {
     algoName_ = name;
-    animator_.start(std::move(steps));  // empty steps (empty graph) leave the animator inactive
+    animator_.start(std::move(steps));  // empty steps (e.g. no nodes) leave the animator inactive
 }
 
 void App::render() {
@@ -106,10 +132,12 @@ void App::render() {
 std::string App::hudText() const {
     if (animator_.active())
         return algoName_ + "   step " + std::to_string(animator_.index()) + " / " +
-               std::to_string(animator_.size()) + (animator_.playing() ? "   [playing]" : "   [paused]") +
-               "\nSpace: play/pause    Left/Right: step    Esc: back to editing";
+               std::to_string(animator_.size()) + (animator_.playing() ? "   [playing]   " : "   [paused]   ") +
+               std::to_string(static_cast<int>(animator_.delay() * 1000)) + " ms/step" +
+               "\nSpace: play/pause    Left/Right: step    +/-: speed    Esc: back to editing";
     if (input_.typingWeight())
         return "Type the edge weight, then Enter to confirm or Esc to cancel";
     return "Click: add node    Drag node to node: add edge    Right-click: set start node\n"
-           "1: BFS    2: DFS    3: Dijkstra    C: clear    F12: screenshot";
+           "1: BFS    2: DFS    3: Dijkstra    4: Kruskal    S/L: save/load    C: clear    F12: screenshot\n" +
+           status_;
 }

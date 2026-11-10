@@ -1,6 +1,8 @@
 #include "core/Algorithms.h"
+#include <algorithm>
 #include <functional>
 #include <limits>
+#include <numeric>
 #include <queue>
 
 namespace {
@@ -95,6 +97,43 @@ std::vector<Step> dijkstra(const Graph& g, int start) {
             }
         }
         steps.push_back({StepType::FinishNode, u});
+    }
+    return steps;
+}
+
+std::vector<Step> kruskal(const Graph& g) {
+    std::vector<Step> steps;
+    const auto& edges = g.edges();
+
+    // Edge ids sorted by weight (stable: equal weights keep insertion order).
+    std::vector<int> order(edges.size());
+    std::iota(order.begin(), order.end(), 0);
+    std::stable_sort(order.begin(), order.end(),
+                     [&](int a, int b) { return edges[a].w < edges[b].w; });
+
+    // Union-find: following parent[] from a node leads to its component's root.
+    std::vector<int> parent(g.nodeCount());
+    std::iota(parent.begin(), parent.end(), 0);
+    auto find = [&](int x) {
+        while (parent[x] != x) {
+            parent[x] = parent[parent[x]];  // path halving keeps the trees flat
+            x = parent[x];
+        }
+        return x;
+    };
+
+    for (int e : order) {
+        steps.push_back({StepType::ConsiderEdge, e});
+        int rootU = find(edges[e].u);
+        int rootV = find(edges[e].v);
+        if (rootU == rootV) {  // already connected: this edge would make a cycle
+            steps.push_back({StepType::RejectEdge, e});
+            continue;
+        }
+        parent[rootU] = rootV;  // merge the two components
+        steps.push_back({StepType::AcceptEdge, e});
+        steps.push_back({StepType::FinishNode, edges[e].u});
+        steps.push_back({StepType::FinishNode, edges[e].v});
     }
     return steps;
 }

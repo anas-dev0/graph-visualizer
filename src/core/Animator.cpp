@@ -52,6 +52,10 @@ void Animator::togglePlay() {
     playing_ = !playing_;
 }
 
+void Animator::setDelay(float seconds) {
+    delay_ = std::clamp(seconds, 0.05f, 2.f);
+}
+
 void Animator::stepForward() {
     if (index_ < steps_.size()) ++index_;
 }

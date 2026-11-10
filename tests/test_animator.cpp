@@ -65,6 +65,14 @@ TEST_CASE("Animator advances one step per delay while playing") {
     CHECK(a.index() == 1);
 }
 
+TEST_CASE("animation speed is clamped") {
+    Animator a;
+    a.setDelay(100.f);
+    CHECK(a.delay() == 2.f);
+    a.setDelay(0.f);
+    CHECK(a.delay() == 0.05f);
+}
+
 TEST_CASE("playing again after the end restarts from the beginning") {
     Animator a;
     a.start(kSteps);

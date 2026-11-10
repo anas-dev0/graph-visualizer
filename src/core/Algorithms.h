@@ -9,4 +9,5 @@ namespace algo {
 std::vector<Step> bfs(const Graph& g, int start);
 std::vector<Step> dfs(const Graph& g, int start);
 std::vector<Step> dijkstra(const Graph& g, int start);
+std::vector<Step> kruskal(const Graph& g);  // minimum spanning tree (a forest if disconnected)
 }

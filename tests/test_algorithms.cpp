@@ -82,6 +82,31 @@ TEST_CASE("Dijkstra finds shortest distances") {
     CHECK(s.dist == std::vector<int>{0, 3, 1, 4, -1});
 }
 
+TEST_CASE("Kruskal builds a minimum spanning tree") {
+    Graph g = makeGraph(4, {{0, 1, 4}, {0, 2, 1}, {2, 1, 2}, {1, 3, 1}, {2, 3, 5}});
+    VisualState s = finalState(g, algo::kruskal(g));
+
+    int totalWeight = 0, accepted = 0;
+    for (size_t e = 0; e < g.edges().size(); ++e) {
+        if (s.edges[e] != EdgeMark::Accepted) continue;
+        totalWeight += g.edges()[e].w;
+        ++accepted;
+    }
+    CHECK(accepted == 3);  // V - 1 edges
+    CHECK(totalWeight == 4);
+    CHECK(s.edges[0] == EdgeMark::Rejected);  // (0,1,4) would close a cycle
+    CHECK(s.edges[4] == EdgeMark::Rejected);  // (2,3,5) too
+}
+
+TEST_CASE("Kruskal on a disconnected graph builds a forest") {
+    // Components: {0,1}, {2,3}, {4}  ->  5 nodes - 3 components = 2 edges
+    Graph g = makeGraph(5, {{0, 1, 3}, {2, 3, 2}});
+    VisualState s = finalState(g, algo::kruskal(g));
+    CHECK(std::count(s.edges.begin(), s.edges.end(), EdgeMark::Accepted) == 2);
+    CHECK(s.nodes[4] == NodeMark::None);
+    CHECK(algo::kruskal(Graph{}).empty());
+}
+
 TEST_CASE("Dijkstra accepts exactly the shortest-path tree edges") {
     Graph g = dijkstraGraph();
     VisualState s = finalState(g, algo::dijkstra(g, 0));

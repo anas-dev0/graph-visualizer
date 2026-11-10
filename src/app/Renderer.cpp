@@ -3,6 +3,8 @@
 
 namespace {
 
+float length(sf::Vector2f v) { return std::sqrt(v.x * v.x + v.y * v.y); }
+
 sf::Color nodeColor(NodeMark mark) {
     switch (mark) {
     case NodeMark::Active: return sf::Color(255, 165, 0);  // orange: discovered
@@ -35,7 +37,12 @@ void Renderer::drawGraph(sf::RenderTarget& target, const Graph& graph,
         sf::Vector2f a = toVector(nodes[edges[i].u]);
         sf::Vector2f b = toVector(nodes[edges[i].v]);
         drawLine(target, a, b, style.color, style.thickness);
-        drawText(target, std::to_string(edges[i].w), (a + b) / 2.f + sf::Vector2f(0.f, -14.f),
+
+        // Put the weight beside the middle of the edge, perpendicular to it, so it never sits on the line.
+        sf::Vector2f d = b - a;
+        sf::Vector2f normal(-d.y / length(d), d.x / length(d));
+        if (normal.y > 0) normal = -normal;  // prefer above / left
+        drawText(target, std::to_string(edges[i].w), (a + b) / 2.f + normal * 14.f,
                  16, sf::Color::White, true);
     }
 
@@ -62,7 +69,7 @@ void Renderer::drawGraph(sf::RenderTarget& target, const Graph& graph,
 void Renderer::drawLine(sf::RenderTarget& target, sf::Vector2f a, sf::Vector2f b,
                         sf::Color color, float thickness) const {
     sf::Vector2f d = b - a;
-    sf::RectangleShape line({std::sqrt(d.x * d.x + d.y * d.y), thickness});
+    sf::RectangleShape line({length(d), thickness});
     line.setOrigin(0.f, thickness / 2.f);
     line.setPosition(a);
     line.setRotation(std::atan2(d.y, d.x) * 180.f / 3.14159265f);
