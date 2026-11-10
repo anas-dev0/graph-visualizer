@@ -1,0 +1,51 @@
+{
+    // Each task is a plain g++ command. When you add a .cpp file, add it to the lists below.
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build app",
+            "type": "process",
+            "command": "g++",
+            "args": [
+                "-std=c++17", "-Wall", "-Wextra", "-g", "-Isrc",
+                "src/core/Graph.cpp", "src/core/Algorithms.cpp", "src/core/Animator.cpp",
+                "src/main.cpp",
+                "-o", "build/graphviz.exe",
+                "-lsfml-graphics", "-lsfml-window", "-lsfml-system"
+            ],
+            "problemMatcher": "$gcc",
+            "group": { "kind": "build", "isDefault": true }
+        },
+        {
+            "label": "Build Catch2 (run once)",
+            "type": "process",
+            "command": "g++",
+            "args": ["-std=c++17", "-c", "tests/catch2/catch_amalgamated.cpp", "-o", "build/catch2.o"],
+            "problemMatcher": "$gcc"
+        },
+        {
+            // Note: no SFML flags here, so the build fails if src/core ever includes SFML.
+            "label": "Build tests",
+            "type": "process",
+            "command": "g++",
+            "args": [
+                "-std=c++17", "-Wall", "-Wextra", "-g", "-Isrc", "-Itests/catch2",
+                "src/core/Graph.cpp", "src/core/Algorithms.cpp", "src/core/Animator.cpp",
+                "tests/test_graph.cpp", "tests/test_algorithms.cpp", "tests/test_animator.cpp",
+                "build/catch2.o",
+                "-o", "build/tests.exe"
+            ],
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "Run tests",
+            "type": "process",
+            "command": "${workspaceFolder}/build/tests.exe",
+            "dependsOn": "Build tests",
+            // MSYS2 first, so Windows doesn't load an older libstdc++ DLL from another program.
+            "options": { "env": { "PATH": "C:\\msys64\\ucrt64\\bin;${env:PATH}" } },
+            "problemMatcher": [],
+            "group": { "kind": "test", "isDefault": true }
+        }
+    ]
+}
