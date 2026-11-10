@@ -64,3 +64,13 @@ TEST_CASE("Animator advances one step per delay while playing") {
     a.update(1.0f);
     CHECK(a.index() == 1);
 }
+
+TEST_CASE("playing again after the end restarts from the beginning") {
+    Animator a;
+    a.start(kSteps);
+    a.pause();
+    for (int i = 0; i < 10; ++i) a.stepForward();
+    a.togglePlay();
+    CHECK(a.playing());
+    CHECK(a.index() == 0);
+}

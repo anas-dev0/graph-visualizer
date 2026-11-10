@@ -9,6 +9,7 @@
             "args": [
                 "-std=c++17", "-Wall", "-Wextra", "-g", "-Isrc",
                 "src/core/Graph.cpp", "src/core/Algorithms.cpp", "src/core/Animator.cpp",
+                "src/app/App.cpp", "src/app/InputHandler.cpp", "src/app/Renderer.cpp",
                 "src/main.cpp",
                 "-o", "build/graphviz.exe",
                 "-lsfml-graphics", "-lsfml-window", "-lsfml-system"

@@ -23,7 +23,8 @@ public:
     void start(std::vector<Step> steps);
     void stop();
     void update(float dt);  // dt = seconds since the last frame
-    void togglePlay() { playing_ = !playing_; }
+    void togglePlay();  // at the end, playing again restarts from step 0
+    void pause() { playing_ = false; }
     void stepForward();
     void stepBack();
 

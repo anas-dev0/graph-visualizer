@@ -47,6 +47,11 @@ void Animator::update(float dt) {
     if (index_ == steps_.size()) playing_ = false;  // reached the end
 }
 
+void Animator::togglePlay() {
+    if (!playing_ && index_ == steps_.size()) index_ = 0;
+    playing_ = !playing_;
+}
+
 void Animator::stepForward() {
     if (index_ < steps_.size()) ++index_;
 }
